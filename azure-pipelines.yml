@@ -6,7 +6,7 @@
 trigger: none
 
 schedules:
-- cron: "* * * * *"
+- cron: "*/2 * * * *"
   displayName: "Check deployments"
   branches:
       include:
