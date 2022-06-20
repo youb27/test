@@ -1,0 +1,36 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- script: |
+    apt update && apt install aws-cli jq -y
+    period=`date -u -d '24 hours ago' "+%Y-%m-%dT%H:%M:%S.%6N%:z"`
+
+    last_modified=`aws elasticbeanstalk describe-environments --region us-east-1 --profile mapme_dev | jq --arg s "$period" '.Environments | .[] | select((.EnvironmentName |contains ("qa")) and (.DateUpdated < $s))'`
+    env_name=`echo "$last_modified" | jq -r .EnvironmentName`
+
+    if [[ -n $last_modified ]]; then
+        for i in $env_name;
+        do
+            for j in qa{1..3};
+            do
+                if [[ $i =~ $j ]]; then
+                echo "Destroying $i"
+                fi
+            done
+        done
+    else 
+        echo "There are nothing to destroy"
+    fi
+  displayName: 'Autodestroy'
