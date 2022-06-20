@@ -3,8 +3,11 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- master
+schedules:
+- cron: "* * * * *"
+  branches:
+    include:
+    - main
 
 pool:
   vmImage: ubuntu-latest
@@ -26,6 +29,8 @@ steps:
                   do
                       if [[ $i =~ $j ]]; then
                       echo "Destroying $i"
+                      terraform init -backend-config mapme-$j
+                      terraform destroy -var-file mapme-$j
                       fi
                   done
               done
