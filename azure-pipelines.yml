@@ -5,6 +5,7 @@
 
 schedules:
 - cron: "* * * * *"
+  displayName: "Check deployments"
   branches:
       include:
       - master
