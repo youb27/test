@@ -14,11 +14,9 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      #!/bin/bash
-      sudo apt update && sudo apt install aws-cli jq -y
           period=`date -u -d '24 hours ago' "+%Y-%m-%dT%H:%M:%S.%6N%:z"`
       
-          last_modified=`aws elasticbeanstalk describe-environments --region us-east-1 --profile mapme_dev | jq --arg s "$period" '.Environments | .[] | select((.EnvironmentName |contains ("qa")) and (.DateUpdated < $s))'`
+          last_modified=`aws elasticbeanstalk describe-environments --region us-east-1 | jq --arg s "$period" '.Environments | .[] | select((.EnvironmentName |contains ("qa")) and (.DateUpdated < $s))'`
           env_name=`echo "$last_modified" | jq -r .EnvironmentName`
       
           if [[ -n $last_modified ]]; then
